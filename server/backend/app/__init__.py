@@ -1,0 +1,1 @@
+"""Video Workbench application package."""

@@ -1,0 +1,11 @@
+[Unit]
+Description=Check the VideoMind IP certificate every six hours
+
+[Timer]
+OnCalendar=*-*-* 00,06,12,18:17:00
+RandomizedDelaySec=30m
+Persistent=true
+Unit=videomind-certbot-renew.service
+
+[Install]
+WantedBy=timers.target

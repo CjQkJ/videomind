@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "videomind"
+version = "0.1.0"
+description = "Command-line client and Agent Skill for the VideoMind video-understanding API (Bilibili & uploads)."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "CjQkJ" }]
+keywords = ["video", "ai", "video-understanding", "agent-skill", "claude-code", "codex", "bilibili"]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Video",
+]
+dependencies = [
+    "requests>=2.28",
+    "typer>=0.12",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.scripts]
+videomind = "videomind.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/CjQkJ/videomind"
+Issues = "https://github.com/CjQkJ/videomind/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.data-files]
+"share/videomind/skills/videomind" = ["skills/videomind/SKILL.md"]
+"share/videomind/skills/videomind/scripts" = ["skills/videomind/scripts/*.py"]
+"share/videomind/skills/videomind/references" = ["skills/videomind/references/*.md"]

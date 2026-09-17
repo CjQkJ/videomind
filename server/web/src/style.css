@@ -1,0 +1,196 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+
+  /* 应用底色与卡片（带 emerald 冷调，非纯白） */
+  --bg-base: #eaf2ee;
+  --bg-card: #ffffff;
+  --bg-sidebar: #f6faf8;
+  --bg-subtle: #f2f7f4;
+  --bg-hover: #e8f2ec;
+  --border-strong: #d7e2db;
+  --border-soft: #e6eee8;
+
+  /* Emerald 品牌（克制强调） */
+  --emerald-primary: #0e9f6e;
+  --emerald-hover: #0b8a5f;
+  --emerald-deep: #0b7a52;
+  --emerald-soft: #e7f5ef;
+  --emerald-glow: rgba(14, 159, 110, 0.18);
+
+  /* 语义色 */
+  --warning: #d97706;
+  --warning-soft: #fdf3e7;
+  --danger: #dc2626;
+  --danger-soft: #fef2f2;
+
+  /* 文字（slate 中性系） */
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --text-dim: #9ca3af;
+
+  /* 品牌渐变（仅 LOGO 与主按钮） */
+  --brand-gradient: linear-gradient(135deg, #0e9f6e 0%, #0b7a52 100%);
+  --panel-gradient: linear-gradient(180deg, #ffffff 0%, #f7faf8 100%);
+
+  --font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  background-color: var(--bg-base);
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(14, 159, 110, 0.14), transparent),
+    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(217, 119, 6, 0.07), transparent),
+    linear-gradient(rgba(120, 156, 138, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 156, 138, 0.05) 1px, transparent 1px);
+  background-size: auto, auto, 30px 30px, 30px 30px;
+  background-attachment: fixed;
+  color: var(--text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(100, 116, 139, 0.35); border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.55); }
+
+/* ---------- Naive UI 商业覆盖 ---------- */
+
+.n-card {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-strong) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 2px 10px -3px rgba(15, 23, 42, 0.08) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.n-card:hover {
+  border-color: rgba(14, 159, 110, 0.4) !important;
+  box-shadow: 0 6px 20px -6px rgba(15, 23, 42, 0.12) !important;
+}
+
+.n-button--primary-type {
+  background: var(--brand-gradient) !important;
+  border: none !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12) !important;
+  transition: all 0.2s ease !important;
+}
+
+.n-button--primary-type:hover {
+  filter: brightness(1.05) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px -4px rgba(14, 159, 110, 0.45) !important;
+}
+
+.n-button--primary-type:active {
+  transform: scale(0.98) !important;
+}
+
+.n-input {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-strong) !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+  color: var(--text-main) !important;
+}
+
+.n-input:hover { border-color: rgba(14, 159, 110, 0.5) !important; }
+.n-input--focus {
+  border-color: var(--emerald-primary) !important;
+  box-shadow: 0 0 0 3px rgba(14, 159, 110, 0.14) !important;
+}
+
+.n-input .n-input__placeholder { color: var(--text-dim) !important; }
+
+.n-tabs .n-tabs-rail {
+  background-color: var(--bg-subtle) !important;
+  border-radius: 9px !important;
+  padding: 3px !important;
+  border: 1px solid var(--border-soft) !important;
+}
+
+.n-tabs .n-tabs-tab { border-radius: 7px !important; font-weight: 600 !important; color: var(--text-muted) !important; transition: all 0.2s ease !important; }
+.n-tabs .n-tabs-tab--active { background: var(--bg-card) !important; color: var(--emerald-deep) !important; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important; }
+
+/* ---------- 品牌叙事 token（保留） ---------- */
+
+:root {
+  --crystal-gradient: linear-gradient(135deg, #d97706 0%, #f59e0b 45%, #b45309 100%);
+  --beam-gradient: linear-gradient(90deg, #0e9f6e 0%, #34d399 45%, #d97706 100%);
+  --crystal-glow: rgba(217, 119, 6, 0.3);
+  --frame-stroke: #0e9f6e;
+}
+
+@keyframes beam-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+@keyframes crystal-breathe {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(217, 119, 6, 0.3)); }
+  50% { filter: drop-shadow(0 0 12px rgba(217, 119, 6, 0.5)); }
+}
+
+@keyframes frame-breathe {
+  0%, 100% { stroke-opacity: 0.55; }
+  50% { stroke-opacity: 1; }
+}
+
+/* ---------- 全局工具类 ---------- */
+
+.gold-gradient-text {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ---------- 动效系统 ---------- */
+
+/* 路由过渡：fade + 8px 上滑 */
+.page-fade-enter-active, .page-fade-leave-active { transition: opacity 0.22s ease, transform 0.22s ease; }
+.page-fade-enter-from { opacity: 0; transform: translateY(8px); }
+.page-fade-leave-to { opacity: 0; transform: translateY(-4px); }
+
+/* 卡片/列表入场：上浮淡入 */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise-in { animation: rise-in 0.4s ease both; }
+
+/* 侧边栏抽屉滑入 */
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.slide-in-left { animation: slide-in-left 0.25s ease both; }

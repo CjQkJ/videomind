@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VideoMind · 视频理解工作台</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2f;
+      --line: rgba(99, 102, 241, .35);
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #6366f1;
+      --ok: #22c55e;
+      --bad: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, "Noto Sans SC", sans-serif;
+      background: radial-gradient(1200px 600px at 10% -10%, #1e1b4b 0%, var(--bg) 55%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    a {
+      color: #a5b4fc;
+      text-decoration: none;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 22px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(8, 12, 24, .75);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand {
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+
+    .brand span {
+      color: #818cf8;
+    }
+
+    nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .nav-btn,
+    button,
+    .btn {
+      border: 1px solid var(--line);
+      background: #151c33;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: .9rem;
+    }
+
+    .nav-btn.active,
+    .btn.primary {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border-color: transparent;
+    }
+
+    .nav-btn:hover,
+    button:hover {
+      filter: brightness(1.08);
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px 60px;
+    }
+
+    .card {
+      background: rgba(18, 26, 47, .9);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      margin: 0 0 8px;
+    }
+
+    h2 {
+      font-size: 1.15rem;
+      margin: 0 0 12px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #0a0f1d;
+      color: var(--text);
+      margin: 8px 0 12px;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .row>* {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .progress {
+      height: 8px;
+      background: #0a0f1d;
+      border-radius: 99px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+
+    .progress>i {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, #6366f1, #22d3ee);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 99px;
+      background: #1e293b;
+      font-size: .8rem;
+      color: var(--muted);
+    }
+
+    .pill.vip {
+      color: #fde68a;
+      border: 1px solid #f59e0b55;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .9rem;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 1px solid #1f2937;
+    }
+
+    pre,
+    .md {
+      background: #0a0f1d;
+      border-radius: 12px;
+      padding: 14px;
+      overflow: auto;
+      max-height: 60vh;
+      line-height: 1.6;
+    }
+
+    .toast {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      background: #111827;
+      border: 1px solid var(--line);
+      padding: 12px 14px;
+      border-radius: 12px;
+      z-index: 50;
+      max-width: 360px;
+    }
+
+    .err {
+      color: var(--bad);
+    }
+
+    .ok {
+      color: var(--ok);
+    }
+
+    .quota {
+      font-size: .85rem;
+      color: var(--muted);
+    }
+
+    code {
+      background: #1e293b;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="brand">VIDEO<span>MIND</span></div>
+    <nav>
+      <button class="nav-btn active" data-route="workbench">工作台</button>
+      <button class="nav-btn" data-route="history">历史</button>
+      <button class="nav-btn" data-route="keys">API Keys</button>
+      <button class="nav-btn" data-route="docs">文档</button>
+      <button class="nav-btn" data-route="login" id="navLogin">登录</button>
+      <span class="pill" id="userPill">访客</span>
+      <span class="quota" id="quotaPill">并发 -/ -</span>
+    </nav>
+  </header>
+  <main>
+    <section id="view-workbench">
+      <div class="card">
+        <h1>视频理解工作台</h1>
+        <p class="muted">B 站链接 / 本地上传 → 原生多模态理解 → 结构化笔记 · 支持最长 4 小时分段处理</p>
+        <div class="tabs">
+          <button class="nav-btn active" id="tabUrl">B 站链接</button>
+          <button class="nav-btn" id="tabUpload">本地上传</button>
+        </div>
+        <div id="boxUrl"><input id="inputUrl" placeholder="https://www.bilibili.com/video/BV... 或 https://b23.tv/..." />
+        </div>
+        <div id="boxUpload" class="hidden">
+          <input type="file" id="fileInput" accept="video/*" />
+          <div class="muted" id="fileLabel">未选择文件</div>
+        </div>
+        <div class="row">
+          <div>
+            <label class="muted">输出模式</label>
+            <select id="modeSelect">
+              <option value="study_note">学习笔记</option>
+              <option value="article">对外成稿</option>
+              <option value="cards">知识卡片</option>
+              <option value="teaching_html">教学讲义 HTML</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn primary" id="btnStart">开始解析</button>
+        <div class="quota" id="createHint"></div>
+      </div>
+      <div class="card hidden" id="progressCard">
+        <h2 id="progTitle">处理中</h2>
+        <div class="muted" id="progMsg">...</div>
+        <div class="progress"><i id="progBar"></i></div>
+        <div class="muted" id="progSeg"></div>
+        <button class="btn" id="btnBack">返回</button>
+      </div>
+      <div class="card hidden" id="resultCard">
+        <h2 id="resTitle">结果</h2>
+        <div class="muted" id="resMeta"></div>
+        <div class="row" style="margin:12px 0">
+          <button class="btn" data-view="md">Markdown</button>
+          <button class="btn" data-view="json">JSON</button>
+          <button class="btn" id="btnRerender">切换模式重渲</button>
+          <button class="btn" id="btnCopy">复制 MD</button>
+        </div>
+        <div class="md" id="mdOut"></div>
+        <pre class="hidden" id="jsonOut"></pre>
+      </div>
+    </section>
+
+    <section id="view-login" class="hidden">
+      <div class="card" style="max-width:480px;margin:40px auto">
+        <h1>邮箱登录</h1>
+        <p class="muted">验证码登录 / 自动注册</p>
+        <input id="loginEmail" type="email" placeholder="you@example.com" />
+        <button class="btn primary" id="btnSendCode">发送验证码</button>
+        <input id="loginCode" placeholder="6 位验证码" />
+        <button class="btn primary" id="btnVerify">登录</button>
+        <div class="muted" id="loginHint"></div>
+      </div>
+    </section>
+
+    <section id="view-history" class="hidden">
+      <div class="card">
+        <h1>历史任务</h1>
+        <p class="muted">登录后显示服务端历史</p>
+        <table>
+          <thead>
+            <tr>
+              <th>任务</th>
+              <th>状态</th>
+              <th>进度</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="histBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="view-keys" class="hidden">
+      <div class="card">
+        <h1>API Keys</h1>
+        <div class="row">
+          <input id="keyName" placeholder="备注名，如 ci" />
+          <button class="btn primary" id="btnCreateKey">创建 Key</button>
+        </div>
+        <div id="keyOnce" class="ok"></div>
+        <table>
+          <thead>
+            <tr>
+              <th>前缀</th>
+              <th>名称</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="keyBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="view-docs" class="hidden">
+      <div class="card">
+        <h1>API 文档</h1>
+        <pre id="docsPre"></pre>
+      </div>
+    </section>
+  </main>
+  <div id="toast" class="toast hidden"></div>
+  <script>
+    const API = window.location.origin;
+    const state = {
+      token: localStorage.getItem('access_token') || '',
+      user: null,
+      inputMode: 'url',
+      fileId: null,
+      jobId: null,
+      poll: null,
+      md: '',
+      json: null,
+    };
+
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.remove('hidden');
+      setTimeout(() => t.classList.add('hidden'), 3500);
+    }
+    async function api(path, opts = {}) {
+      const headers = Object.assign({}, opts.headers || {});
+      if (state.token) headers['Authorization'] = 'Bearer ' + state.token;
+      if (opts.json) {
+        headers['Content-Type'] = 'application/json';
+        opts.body = JSON.stringify(opts.json);
+      }
+      const res = await fetch(API + path, { ...opts, headers });
+      const ct = res.headers.get('content-type') || '';
+      const data = ct.includes('application/json') ? await res.json() : await res.text();
+      if (!res.ok) {
+        const detail = data && data.detail ? data.detail : (typeof data === 'string' ? data : res.statusText);
+        throw new Error(typeof detail === 'string' ? detail : JSON.stringify(detail));
+      }
+      return data;
+    }
+    function route(name) {
+      document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+      document.getElementById('view-' + name).classList.remove('hidden');
+      document.querySelectorAll('.nav-btn[data-route]').forEach(b => b.classList.toggle('active', b.dataset.route === name));
+      if (name === 'history') loadHistory();
+      if (name === 'keys') loadKeys();
+      if (name === 'docs') renderDocs();
+    }
+    document.querySelectorAll('.nav-btn[data-route]').forEach(b => b.addEventListener('click', () => route(b.dataset.route)));
+
+    async function refreshMe() {
+      try {
+        if (!state.token) throw new Error('no token');
+        state.user = await api('/api/v1/auth/me');
+        document.getElementById('userPill').textContent = state.user.email + (state.user.tier === 'vip' ? ' · VIP' : '');
+        document.getElementById('userPill').classList.toggle('vip', state.user.tier === 'vip');
+        document.getElementById('navLogin').textContent = '退出';
+      } catch {
+        state.user = null;
+        document.getElementById('userPill').textContent = '访客';
+        document.getElementById('userPill').classList.remove('vip');
+        document.getElementById('navLogin').textContent = '登录';
+      }
+      try {
+        const h = await api('/api/v1/health');
+        const q = h.quota || {};
+        document.getElementById('quotaPill').textContent = `并发 ${q.running ?? '-'}/${q.limit ?? '-'} · 全站 ${q.global_running ?? '-'}/${q.global_limit ?? '-'}`;
+      } catch { }
+    }
+    document.getElementById('navLogin').addEventListener('click', () => {
+      if (state.user) {
+        state.token = ''; localStorage.removeItem('access_token'); state.user = null; refreshMe(); toast('已退出'); route('workbench');
+      } else route('login');
+    });
+
+    document.getElementById('tabUrl').onclick = () => { state.inputMode = 'url'; document.getElementById('boxUrl').classList.remove('hidden'); document.getElementById('boxUpload').classList.add('hidden'); document.getElementById('tabUrl').classList.add('active'); document.getElementById('tabUpload').classList.remove('active'); };
+    document.getElementById('tabUpload').onclick = () => { state.inputMode = 'upload'; document.getElementById('boxUpload').classList.remove('hidden'); document.getElementById('boxUrl').classList.add('hidden'); document.getElementById('tabUpload').classList.add('active'); document.getElementById('tabUrl').classList.remove('active'); };
+    document.getElementById('fileInput').onchange = async (e) => {
+      const f = e.target.files[0]; if (!f) return;
+      document.getElementById('fileLabel').textContent = '上传中: ' + f.name;
+      const fd = new FormData(); fd.append('file', f);
+      try {
+        const headers = state.token ? { Authorization: 'Bearer ' + state.token } : {};
+        const res = await fetch(API + '/api/v1/uploads', { method: 'POST', body: fd, headers });
+        const d = await res.json();
+        if (!res.ok) throw new Error(d.detail || 'upload failed');
+        state.fileId = d.file_id;
+        document.getElementById('fileLabel').textContent = '已上传: ' + f.name;
+        toast('上传成功');
+      } catch (err) { toast('上传失败: ' + err.message); }
+    };
+
+    document.getElementById('btnStart').onclick = async () => {
+      try {
+        const mode = document.getElementById('modeSelect').value;
+        const payload = {
+          input: state.inputMode === 'url'
+            ? { type: 'bilibili_url', url: document.getElementById('inputUrl').value.trim() }
+            : { type: 'upload', file_id: state.fileId },
+          output: { mode, formats: ['json', 'markdown'] },
+          options: { show_source: true }
+        };
+        const d = await api('/api/v1/jobs', { method: 'POST', json: payload });
+        state.jobId = d.job_id;
+        document.getElementById('createHint').textContent = d.can_start_now ? '已入队，即将开始' : '已入队排队: ' + d.queue_reason;
+        document.getElementById('progressCard').classList.remove('hidden');
+        document.getElementById('resultCard').classList.add('hidden');
+        startPoll();
+      } catch (e) { toast(e.message); }
+    };
+
+    function startPoll() {
+      clearInterval(state.poll);
+      const tick = async () => {
+        try {
+          const d = await api('/api/v1/jobs/' + state.jobId);
+          document.getElementById('progTitle').textContent = d.status === 'failed' ? '解析失败' : '处理中';
+          document.getElementById('progMsg').textContent = d.message || d.error || '';
+          document.getElementById('progBar').style.width = (d.progress || 0) + '%';
+          document.getElementById('progSeg').textContent = (d.segment_total > 0) ? `分段 ${d.segment_done || 0}/${d.segment_total}` : '';
+          if (d.quota) document.getElementById('quotaPill').textContent = `并发 ${d.quota.running}/${d.quota.limit} · 全站 ${d.quota.global_running}/${d.quota.global_limit}`;
+          if (d.status === 'succeeded') { clearInterval(state.poll); await showResult(); }
+          if (d.status === 'failed') { clearInterval(state.poll); toast(d.error || d.message); }
+        } catch (e) { /* ignore transient */ }
+      };
+      tick(); state.poll = setInterval(tick, 1500);
+    }
+    async function showResult() {
+      const meta = await api('/api/v1/jobs/' + state.jobId + '/result');
+      const m = meta.metadata || {};
+      document.getElementById('resTitle').textContent = m.title || '结果';
+      document.getElementById('resMeta').textContent = `UP: ${m.uploader || '-'} · ${m.duration_sec || 0}s · mode ${meta.mode || ''}`;
+      state.md = await api('/api/v1/jobs/' + state.jobId + '/result.md');
+      document.getElementById('mdOut').innerHTML = marked.parse(state.md || '');
+      try { state.json = await api('/api/v1/jobs/' + state.jobId + '/result.json'); document.getElementById('jsonOut').textContent = JSON.stringify(state.json, null, 2); } catch { state.json = null; }
+      document.getElementById('progressCard').classList.add('hidden');
+      document.getElementById('resultCard').classList.remove('hidden');
+      toast('完成');
+    }
+    document.getElementById('btnBack').onclick = () => { clearInterval(state.poll); document.getElementById('progressCard').classList.add('hidden'); };
+    document.querySelectorAll('[data-view]').forEach(b => b.onclick = () => {
+      const v = b.dataset.view;
+      document.getElementById('mdOut').classList.toggle('hidden', v !== 'md');
+      document.getElementById('jsonOut').classList.toggle('hidden', v !== 'json');
+    });
+    document.getElementById('btnCopy').onclick = () => navigator.clipboard.writeText(state.md || '').then(() => toast('已复制'));
+    document.getElementById('btnRerender').onclick = async () => {
+      const mode = document.getElementById('modeSelect').value;
+      try {
+        const d = await api('/api/v1/jobs/' + state.jobId + '/rerender', { method: 'POST', json: { mode, show_source: true } });
+        state.md = d.markdown || '';
+        document.getElementById('mdOut').innerHTML = marked.parse(state.md);
+        toast('已切换为 ' + mode);
+      } catch (e) { toast(e.message); }
+    };
+
+    document.getElementById('btnSendCode').onclick = async () => {
+      try {
+        const email = document.getElementById('loginEmail').value.trim();
+        const d = await api('/api/v1/auth/request-code', { method: 'POST', json: { email } });
+        let hint = '验证码已发送';
+        if (d.dev_code) hint += '（开发模式 code=' + d.dev_code + '）';
+        document.getElementById('loginHint').textContent = hint;
+        toast(hint);
+      } catch (e) { document.getElementById('loginHint').textContent = e.message; toast(e.message); }
+    };
+    document.getElementById('btnVerify').onclick = async () => {
+      try {
+        const d = await api('/api/v1/auth/verify', {
+          method: 'POST', json: {
+            email: document.getElementById('loginEmail').value.trim(),
+            code: document.getElementById('loginCode').value.trim()
+          }
+        });
+        state.token = d.access_token; localStorage.setItem('access_token', state.token);
+        await refreshMe(); toast('登录成功'); route('workbench');
+      } catch (e) { toast(e.message); }
+    };
+
+    async function loadHistory() {
+      const body = document.getElementById('histBody');
+      if (!state.token) { body.innerHTML = '<tr><td colspan="4">请先登录</td></tr>'; return; }
+      try {
+        const d = await api('/api/v1/jobs?limit=50');
+        body.innerHTML = (d.items || []).map(j => `<tr>
+          <td><div>${j.metadata?.title || j.job_id}</div><div class="muted">${j.job_id}</div></td>
+          <td>${j.status}</td><td>${j.progress || 0}%</td>
+          <td><button class="btn" onclick="openJob('${j.job_id}')">打开</button></td></tr>`).join('') || '<tr><td colspan="4">暂无</td></tr>';
+      } catch (e) { body.innerHTML = `<tr><td colspan="4">${e.message}</td></tr>`; }
+    }
+    window.openJob = async (id) => { state.jobId = id; route('workbench'); document.getElementById('progressCard').classList.remove('hidden'); await showResult().catch(() => startPoll()); };
+
+    async function loadKeys() {
+      const body = document.getElementById('keyBody');
+      if (!state.token) { body.innerHTML = '<tr><td colspan="4">请先登录</td></tr>'; return; }
+      try {
+        const rows = await api('/api/v1/api-keys');
+        body.innerHTML = rows.map(r => `<tr><td>${r.key_prefix}…</td><td>${r.name}</td><td>${r.is_active ? 'active' : 'off'}</td>
+          <td><button class="btn" onclick="delKey(${r.id})">禁用</button></td></tr>`).join('') || '<tr><td colspan="4">暂无 Key</td></tr>';
+      } catch (e) { body.innerHTML = `<tr><td colspan="4">${e.message}</td></tr>`; }
+    }
+    document.getElementById('btnCreateKey').onclick = async () => {
+      try {
+        const d = await api('/api/v1/api-keys', { method: 'POST', json: { name: document.getElementById('keyName').value || 'default' } });
+        document.getElementById('keyOnce').textContent = '请保存 Key（仅一次）: ' + d.key;
+        loadKeys();
+      } catch (e) { toast(e.message); }
+    };
+    window.delKey = async (id) => { try { await api('/api/v1/api-keys/' + id, { method: 'DELETE' }); loadKeys(); } catch (e) { toast(e.message); } };
+
+    function renderDocs() {
+      document.getElementById('docsPre').textContent = `VideoMind API
+
+Auth:
+  登录 JWT: Authorization: Bearer <access_token>
+  API Key:  Authorization: Bearer vw_xxx
+
+POST /api/v1/auth/request-code  {"email":"..."}
+POST /api/v1/auth/verify        {"email":"...","code":"..."}
+GET  /api/v1/auth/me
+
+POST /api/v1/uploads            multipart file
+POST /api/v1/jobs
+{
+  "input": {"type":"bilibili_url","url":"https://..."},
+  "output": {"mode":"study_note","formats":["json","markdown"]},
+  "options": {"show_source": true}
+}
+GET  /api/v1/jobs
+GET  /api/v1/jobs/{id}
+GET  /api/v1/jobs/{id}/result
+GET  /api/v1/jobs/{id}/result.json
+GET  /api/v1/jobs/{id}/result.md
+GET  /api/v1/jobs/{id}/result.html   (teaching_html；按任务所有权访问)
+POST /api/v1/jobs/{id}/rerender {"mode":"cards"}  (仅认证任务所有者)
+
+POST /api/v1/api-keys  {"name":"ci"}
+GET  /api/v1/api-keys
+DELETE /api/v1/api-keys/{id}
+
+Concurrency: guest global 1 | user 2 | vip 4 | hard cap 4
+Queue caps: guest 10 | per-user 20 | global 200 (429 when full)
+Upload: multipart, streamed, max 500 MiB (413 removes partial file)
+Job options: show_source/language only; upstream URL/key/model/duration/mode are server-owned
+Max duration: 4 hours (segmented)
+`;
+    }
+
+    refreshMe();
+  </script>
+</body>
+
+</html>

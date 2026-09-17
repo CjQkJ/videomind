@@ -1,0 +1,13 @@
+[Unit]
+Description=Renew the VideoMind Let's Encrypt IP certificate
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/certbot-venv/bin/certbot renew --quiet --cert-name your-domain.com --deploy-hook "/usr/bin/systemctl reload nginx.service"
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/etc/letsencrypt /var/lib/letsencrypt /var/log/letsencrypt /var/www/letsencrypt

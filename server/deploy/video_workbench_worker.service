@@ -1,0 +1,32 @@
+[Unit]
+Description=VideoMind Workbench Worker
+Wants=network-online.target
+After=network-online.target video_workbench.service
+
+[Service]
+Type=simple
+User=videomind
+Group=videomind
+WorkingDirectory=/opt/video_workbench/backend
+EnvironmentFile=/opt/video_workbench/backend/.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 -m app.worker
+Restart=always
+RestartSec=5
+TimeoutStopSec=90
+UMask=0077
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ReadWritePaths=/opt/video_workbench/backend/jobs_data /opt/video_workbench/backend/uploads_data /var/lib/videomind
+
+[Install]
+WantedBy=multi-user.target

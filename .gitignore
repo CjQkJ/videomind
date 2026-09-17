@@ -1,0 +1,38 @@
+# Build / dist
+build/
+dist/
+*.egg-info/
+__pycache__/
+*.py[cod]
+*.egg
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local config / secrets
+config.json
+*.token
+.env
+.env.*
+!.env.example
+
+# Server runtime data
+server/backend/jobs_data/
+server/backend/uploads_data/
+*.sqlite3
+*.sqlite3.bak_*
+server/web/node_modules/
+server/web/dist/
