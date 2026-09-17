@@ -17,6 +17,7 @@ VideoMind 会**真正看懂**视频——基于画面 + 声音的原生多模态
 ## ✨ 特性
 
 - 🎯 **原生音画理解**：整段视频送入多模态模型，画面细节 + 语音内容同时理解，不是字幕压缩
+  <br/>*（因此**必须使用支持原生视频理解的模型**，推荐 Gemini）*
 - 📝 **四种产物**：学习笔记 / 对外成稿 / 知识卡片 / 教学讲义 HTML
 - ✂️ **长视频分段**：>15 分钟自动切段（12 分钟 + 30 秒重叠），最长支持 4 小时
 - ⚡ **一条命令**：`videomind <链接>` 提交 → 等待 → 保存，一步到位
@@ -48,11 +49,19 @@ videomind/
 
 ### 一、部署服务端
 
+> ⚠️ **必须使用支持原生视频理解的模型**（如 Gemini 系列），推荐 **Gemini**。
+> VideoMind 的核心能力是把整段视频（画面 + 声音）直接送入多模态模型理解，
+> 纯文本模型或不支持视频输入的模型无法工作。默认配置 `gemini-3.6-flash-high`
+> 已按 Gemini 的原生视频路由实现；换用其他模型前请确认其支持视频输入且端点兼容。
+>
+> **如何接入模型**：任何兼容 OpenAI / Gemini 原生视频路由的端点都可以。填你自己的
+> 官方 API，或用下面的作者自营中转站（见「模型接入方式」）。
+
 ```bash
 cd server/backend
 pip install -r requirements.txt          # 系统依赖：ffmpeg、ffprobe、yt-dlp
 
-cp .env.example .env                     # 填入上游端点与密钥
+cp .env.example .env                     # 填入上游端点、密钥与模型名
 python -m uvicorn main:app --host 127.0.0.1 --port 8000
 ```
 
@@ -64,6 +73,33 @@ npm install && npm run build             # 产出 dist/，交给 Nginx 托管
 ```
 
 > 完整的生产部署（systemd、Nginx、HTTPS 证书、并发调优）见 [`server/README.md`](server/README.md)。
+
+### 模型接入方式
+
+VideoMind 不绑定任何模型供应商，`OPENAI_BASE_URL` 指向哪个端点由你决定。两种常见选择：
+
+**方式 A：官方 API（推荐用于生产）**
+
+直接使用 Google Gemini 官方 API 或你信任的云厂商端点，稳定性和数据合规性最有保障：
+
+```env
+OPENAI_BASE_URL=https://generativelanguage.googleapis.com
+OPENAI_API_KEY=你的官方密钥
+DEFAULT_MODEL=gemini-3.6-flash-high
+```
+
+**方式 B：作者自营中转站（成本更低）**
+
+> ⚠️ **透明声明**：`https://1127666.xyz` 是本项目作者（CjQkJ）自营的 API 中转站，
+> 属于推广性质，非中立第三方推荐。它提供 Gemini 系列模型，价格约为官方定价的 1/5。
+> 使用前请自行评估：你的视频内容与 API Key 会经过该中转站，请勿用于敏感数据场景。
+> 你完全可以改用其他任何兼容端点，代码无需改动。
+
+```env
+OPENAI_BASE_URL=https://1127666.xyz
+OPENAI_API_KEY=在中转站获取的密钥
+DEFAULT_MODEL=gemini-3.6-flash-high
+```
 
 ### 二、安装客户端
 
@@ -129,6 +165,7 @@ videomind "./demo.mp4" --mode cards -o ./notes/              # 本地视频 + �
 | :--- | :--- |
 | **输入** | B 站链接（含 b23 短链）、本地视频上传 |
 | **理解模式** | `native`（整段视频原生理解，默认）/ `frames`（抽帧兜底）/ `auto`（自动降级） |
+| **模型要求** | ⚠️ 必须支持原生视频理解（推荐 **Gemini**）；默认 `gemini-3.6-flash-high` 走 Antigravity 原生视频路由 |
 | **用户体系** | 邮箱验证码登录、密码登录、注册、找回密码；JWT + API Key 双凭证 |
 | **配额队列** | Guest 1 / User 2 / VIP 4，全站硬上限 4；DB Worker 原子领取 + 租约自愈 |
 | **管理后台** | `ADMIN_EMAIL` 指定账号可见：用户管理、使用记录、API Key、模型热改 |

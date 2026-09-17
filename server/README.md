@@ -32,6 +32,9 @@ deploy/                   # systemd / Nginx / certbot 模板
 
 ## 快速启动（本地）
 
+> ⚠️ **模型要求**：必须使用支持**原生视频理解**的模型（视频画面 + 音频直接输入），推荐 **Gemini**。
+> 默认 `gemini-3.6-flash-high` 走 Antigravity 原生视频路由；纯文本模型或不支持视频输入的模型无法工作。
+
 ```bash
 cd server/backend
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
@@ -41,6 +44,7 @@ pip install -r requirements.txt
 cat > .env <<'EOF'
 OPENAI_BASE_URL=https://your-upstream-endpoint
 OPENAI_API_KEY=your-upstream-key
+DEFAULT_MODEL=gemini-3.6-flash-high
 SECRET_KEY=change-me-to-a-long-random-string
 EOF
 
@@ -81,8 +85,8 @@ npm run build
 
 | 变量 | 说明 |
 | :--- | :--- |
-| `OPENAI_BASE_URL` / `OPENAI_API_KEY` | 上游 OpenAI 兼容端点与密钥（必填，无默认值） |
-| `DEFAULT_MODEL` | 默认理解模型 |
+| `OPENAI_BASE_URL` / `OPENAI_API_KEY` | 上游端点与密钥（必填，无默认值） |
+| `DEFAULT_MODEL` | 默认理解模型；**必须支持原生视频理解**，推荐 Gemini 系列 |
 | `SECRET_KEY` | JWT 与验证码签名密钥（生产必填且非默认） |
 | `DATABASE_URL` | 默认 `sqlite:///./jobs_data/app.sqlite3` |
 | `SMTP_HOST` / `SMTP_USER` / `SMTP_PASSWORD` | 邮箱验证码发信（生产必填） |
@@ -90,6 +94,17 @@ npm run build
 | `WORKER_COUNT` | Worker 并发槽位 |
 | `MAX_VIDEO_DURATION_SEC` | 单视频时长上限（默认 14400 = 4 小时） |
 | `CORS_ORIGINS` | 允许的前端来源，逗号分隔；生产不允许 `*` |
+
+## 模型接入
+
+VideoMind 不绑定模型供应商，`OPENAI_BASE_URL` 指向哪家由你决定：
+
+- **官方 API（推荐用于生产）**：直接用 Google Gemini 官方端点，稳定性与数据合规性最有保障。
+- **作者自营中转站**：`https://1127666.xyz` 是项目作者自营的中转服务（推广性质，非中立推荐），
+  提供 Gemini 系列模型，价格约为官方定价的 1/5。使用前请注意：视频内容与 API Key 会经过该中转站，
+  敏感数据场景请改用官方 API。换成其他兼容端点无需改动代码。
+
+无论选哪种，都要确认所选模型支持**原生视频输入**（画面 + 音频），否则任务会直接失败。
 
 ## 许可
 
