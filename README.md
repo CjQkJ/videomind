@@ -94,15 +94,14 @@ DEFAULT_MODEL=gemini-3.6-flash-high
 > 属于推广性质，非中立第三方推荐。它提供 Gemini 系列模型，价格约为官方定价的 1/5;同时也提供远低于官方价格的低价gpt，claude和grok模型。
 > 使用前请自行评估。
 
-
-**方式 C：自己找第三方的gemini或者是具有原生视频理解能力的模型api**
-> 你完全可以改用其他任何兼容端点，代码无需改动。
-
 ```env
 OPENAI_BASE_URL=https://1127666.xyz
 OPENAI_API_KEY=在中转站获取的密钥
 DEFAULT_MODEL=gemini-3.6-flash-high
 ```
+
+**方式 C：自己找第三方的gemini或者是具有原生视频理解能力的模型api**
+> 你完全可以改用其他任何兼容端点，代码无需改动，只需接入第三方api。
 
 ### 二、安装客户端
 
